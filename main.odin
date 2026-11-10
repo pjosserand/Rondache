@@ -201,7 +201,6 @@ update_player_movement :: proc()
 
 	player_move.position += (velocity * delta_time)
 
-
 	player_move.position.x = clamp(player_move.position.x , f32(get_game_position().x) + player_sprite.offset.x, f32((get_game_size().x +get_game_position().x)) -  player_sprite.offset.x )
 	player_move.position.y = clamp(player_move.position.y , f32(get_game_position().y) + player_sprite.offset.y, f32((get_game_size().y +get_game_position().y)) -  player_sprite.offset.y )
 
@@ -209,7 +208,7 @@ update_player_movement :: proc()
 
 draw_player :: proc()
 {
-	draw_position :  [2] f32 = player_move.position
+	draw_position :  [2] f32 = player_move.position - player_sprite.offset
 	rl.DrawRectangleV(draw_position ,player_sprite.size,player_sprite.color)
 	rl.DrawPixelV(player_move.position, rl.GREEN)
 }
