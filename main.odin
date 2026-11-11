@@ -86,13 +86,7 @@ PlayerMovementData :: struct
 	speed : f32,
 }
 
-PlayerInputData :: struct
-{
-	leftStickXDeadzone : f32,
-	leftStickYDeadzone : f32,
 
-	input_movement : [2]f32,
-}
 
 PlayerSpriteData :: struct
 {
@@ -102,7 +96,6 @@ PlayerSpriteData :: struct
 }
 
 player_move : PlayerMovementData
-player_input : PlayerInputData
 player_sprite : PlayerSpriteData
 
 init_player :: proc()
@@ -124,78 +117,11 @@ init_player :: proc()
 	player_sprite.color = rl.RED
 }
 
-handle_input_movement_gamepad :: proc() -> [2]f32
-{
-	input :[2]f32
-
-    //Gamepad
-    if rl.IsGamepadAvailable(0) == false
-    {
-    	return input
-    }
-
-    leftStickX : f32
-    leftStickY : f32
-
-    leftStickX = rl.GetGamepadAxisMovement(0, .LEFT_X);
-    leftStickY = rl.GetGamepadAxisMovement(0, .LEFT_Y)
-
-    //fmt.println("GamepadAxisCount : ", rl.GetGamepadAxisMovement(0, .LEFT_X))
-
-    if leftStickX > - player_input.leftStickXDeadzone && leftStickX < player_input.leftStickXDeadzone
-    {
-       	leftStickX = 0.0
-    }
-
-    if leftStickY > - player_input.leftStickYDeadzone && leftStickY < player_input.leftStickYDeadzone
-    {
-       	leftStickY = 0.0
-    }
-
-	input.x = leftStickX
-	input.y = leftStickY
-
-	return la.normalize0(input)
-}
-
-handle_input_movement :: proc() -> [2]f32
-{
-
-    input :[2]f32
-
-    input = handle_input_movement_gamepad()
-
-    if rl.IsKeyDown(.UP)
-    {
-        input.y = -1
-    }
-
-    if rl.IsKeyDown(.DOWN)
-    {
-        input.y = 1
-    }
-
-    if rl.IsKeyDown(.LEFT)
-    {
-        input.x = -1
-    }
-
-    if rl.IsKeyDown(.RIGHT)
-    {
-        input.x  = 1
-    }
-
-    return la.normalize0(input)
-
-}
-
-handle_input :: proc()
-{
-	player_move.direction = handle_input_movement()
-}
 
 update_player_movement :: proc()
 {
+	player_move.direction = player_input.input_movement
+
 	velocity : [2]f32 = player_move.direction * player_move.speed
 	new_position :  [2]f32 = player_move.position + (velocity * delta_time)
 
@@ -230,6 +156,8 @@ main :: proc()
 	init_game()
 
 	init_player()
+
+	init_input()
 
 	for rl.WindowShouldClose() == false
 	{
