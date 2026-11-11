@@ -32,11 +32,9 @@ delta_time : f32
 init_game_window :: proc()
 {
 
-	game.window_size = {1280,720}
+	set_game_window_size({1280,720})
 
-	set_game_window_size()
-
-	rl.SetConfigFlags({.WINDOW_RESIZABLE, .BORDERLESS_WINDOWED_MODE})
+	rl.SetConfigFlags({/*.WINDOW_RESIZABLE,*/.BORDERLESS_WINDOWED_MODE})
 
 	rl.InitWindow(game.window_size.x, game.window_size.y,"Rondache")
 	rl.SetWindowMaxSize(1920, 1080)
@@ -49,8 +47,10 @@ init_game_window :: proc()
 }
 
 
-set_game_window_size :: proc()
+set_game_window_size :: proc(new_game_window_size : [2]i32)
 {
+	game.window_size = new_game_window_size
+
 	game_side_width :i32 = game.window_size.x / 4
 	game.game_size.x = game_side_width * 2
 	game.game_size.y = game.window_size.y
@@ -58,26 +58,52 @@ set_game_window_size :: proc()
 	game.position.x = game_side_width
 	game.position.y = 0
 }
+
 update_game_window ::proc()
 {
-
 	//Window resize
 	if rl.IsWindowResized() == true
 	{
-		game.window_size = {rl.GetScreenWidth(), rl.GetScreenHeight()}
-		set_game_window_size()
-		player_move.position = {f32(get_game_position().x + get_game_size().x / 2.0), f32(get_game_position().y + get_game_size().y / 2.0)}
+		previous_game_pos :[2]i32 = get_game_position()
+		previous_game_size :[2]i32 = get_game_size()
+
+		set_game_window_size({rl.GetScreenWidth(), rl.GetScreenHeight()})
+		player_move.position = update_entity_position_window_resized(previous_game_pos, previous_game_size, player_move.position)
 	}
 
 	if rl.IsKeyPressed(.F11) == true
 	{
-		game.window_size = {1920, 1080}
+		previous_game_pos :[2]i32 = get_game_position()
+		previous_game_size :[2]i32 = get_game_size()
 		rl.ToggleFullscreen()
-		set_game_window_size()
-		player_move.position = {f32(get_game_position().x + get_game_size().x / 2.0), f32(get_game_position().y + get_game_size().y / 2.0)}
+		player_move.position = update_entity_position_window_resized(previous_game_pos, previous_game_size, player_move.position)
 	}
-
 }
+
+update_entity_position_window_resized :: proc(previous_game_pos :[2]i32, previous_game_size : [2]i32, previous_entity_position : [2]f32 ) -> [2]f32
+{
+	uniform_position :  [2]f32
+
+	uniform_position.x =  inv_lerp(f32(previous_game_pos.x), f32(previous_game_pos.x + previous_game_size.x) , previous_entity_position.x)
+	uniform_position.y =  inv_lerp(f32(previous_game_pos.y), f32(previous_game_pos.y + previous_game_size.y) , previous_entity_position.y)
+
+	new_position : [2]f32
+
+	new_position.x = lerp(f32(get_game_position().x), f32(get_game_position().x + get_game_size().x), uniform_position.x)
+	new_position.y = lerp(f32(get_game_position().y), f32(get_game_position().y + get_game_size().y), uniform_position.y)
+
+	return new_position
+}
+
+/*
+set_game_window_size :: proc(new_game_window_size : [2]i32)
+{
+	previous_game_window_size : [2]i32 = game.window_size
+	game.window_size = new_game_window_size
+	set
+}
+
+*/
 
 PlayerMovementData :: struct
 {
