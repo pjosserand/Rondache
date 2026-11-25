@@ -29,8 +29,8 @@ init_player :: proc()
 	player_move.speed = 250
 
 	//input settings
-	player_input.leftStickXDeadzone = 0.4
-	player_input.leftStickYDeadzone = 0.4
+	player_input.leftStickXDeadzone = 0.6
+	player_input.leftStickYDeadzone = 0.6
 
 	//sprite
 
