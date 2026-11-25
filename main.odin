@@ -13,6 +13,8 @@ Game :: struct
 	window_size : [2]i32,
 	game_size : [2]i32,
 	position : [2]i32,
+	horizontal_boundary : [2]i32,
+	vertical_boundary : [2]i32
 }
 
 get_game_position :: proc() -> [2]i32
@@ -23,6 +25,16 @@ get_game_position :: proc() -> [2]i32
 get_game_size :: proc() -> [2]i32
 {
 	return game.game_size
+}
+
+get_game_horizontal_boundary::proc()->[2]i32
+{
+	return game.horizontal_boundary
+}
+
+get_game_vertical_boundary::proc()->[2]i32
+{
+	return game.vertical_boundary
 }
 
 game : Game
@@ -56,6 +68,17 @@ set_game_window_size :: proc(new_game_window_size : [2]i32)
 
 	game.position.x = game_side_width
 	game.position.y = 0
+
+	update_game_boundaries()
+}
+
+update_game_boundaries::proc()
+{
+	game.horizontal_boundary.x = game.position.x
+	game.horizontal_boundary.y = game.position.x + game.game_size.x
+
+	game.vertical_boundary.x = game.position.y
+	game.vertical_boundary.y = game.position.y + game.game_size.y
 }
 
 update_game_window ::proc()
@@ -124,6 +147,10 @@ main :: proc()
 
 	init_input()
 
+	init_bullet_pool(bullet_player_pool[:])
+
+	init_bullet_test()
+
 	for rl.WindowShouldClose() == false
 	{
 
@@ -133,7 +160,9 @@ main :: proc()
 
 		handle_input()
 
-		update_player_movement()
+		update_player(delta_time)
+
+		update_all_bullet_movement(bullet_player_pool[:], delta_time)
 
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.BLANK)
@@ -142,6 +171,7 @@ main :: proc()
 
 		draw_player()
 
+		draw_bullet(bullet_player_pool[:])
 
 		resolution_debug : cstring =fmt.ctprintf("screen size %v \ngame area position %v\ngame area size %v ",game.window_size, game.position, game.game_size)
 		rl.DrawText(resolution_debug , 0 , 10, 20,rl.WHITE)

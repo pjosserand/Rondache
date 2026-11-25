@@ -82,6 +82,7 @@ move_vertical_axis_command :: proc(vertical_axis : f32)
 shoot_command::proc()
 {
 	player_input.input_shoot = true
+
 }
 
 init_input :: proc()
@@ -154,7 +155,7 @@ handle_input_gamepad :: proc()
 
 handle_input_pc_zqsd :: proc()
 {
-	if rl.IsKeyDown(.UP)
+	if rl.IsKeyDown(.W)
     {
     	if pc_inputs.arrow_up == nil
      	{
@@ -163,7 +164,7 @@ handle_input_pc_zqsd :: proc()
       	pc_inputs.arrow_up()
     }
 
-    if rl.IsKeyDown(.DOWN)
+    if rl.IsKeyDown(.S)
     {
    		if pc_inputs.arrow_down == nil
     	{
@@ -172,7 +173,7 @@ handle_input_pc_zqsd :: proc()
    		pc_inputs.arrow_down()
     }
 
-    if rl.IsKeyDown(.LEFT)
+    if rl.IsKeyDown(.A)
     {
 	   	if pc_inputs.arrow_left == nil
 	   	{
@@ -181,7 +182,7 @@ handle_input_pc_zqsd :: proc()
   		pc_inputs.arrow_left()
     }
 
-    if rl.IsKeyDown(.RIGHT)
+    if rl.IsKeyDown(.D)
     {
    		if pc_inputs.arrow_right == nil
 	   	{
@@ -196,11 +197,21 @@ handle_input_pc::proc()
 	handle_input_pc_zqsd()
 }
 
-
-handle_input :: proc()
+handle_input_begin :: proc()
 {
 	player_input.input_movement = {0,0}
 	player_input.input_shoot = false
+}
+
+handle_input_end :: proc()
+{
+	//End of input
+	player_input.input_movement = la.normalize0(player_input.input_movement)
+}
+
+handle_input :: proc()
+{
+	handle_input_begin()
 
 	if rl.IsGamepadAvailable(0) == true
 	{
@@ -209,6 +220,5 @@ handle_input :: proc()
 
 	handle_input_pc()
 
-	//End of input
-	player_input.input_movement = la.normalize0(player_input.input_movement)
+	handle_input_end()
 }
